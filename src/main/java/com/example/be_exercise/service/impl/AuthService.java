@@ -122,8 +122,15 @@ public class AuthService implements IAuthService {
 
             // Check if refresh token is invalid
             String jwtId = token.getJWTClaimsSet().getJWTID();
+            Instant expirationTime = token.getJWTClaimsSet().getExpirationTime().toInstant();
             if(invalidTokenRepository.existsById(jwtId))
                 throw new InvalidRefreshTokenException("Invalid refresh token");
+
+            InvalidToken invalidToken = InvalidToken.builder()
+                    .id(jwtId)
+                    .expirationTime(expirationTime)
+                    .build();
+            invalidTokenRepository.save(invalidToken);
 
             String accessToken = jwtUtils.generateAccessToken(user);
             return RefreshTokenResponse.builder()
