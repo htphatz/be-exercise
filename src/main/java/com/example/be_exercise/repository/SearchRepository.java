@@ -29,8 +29,8 @@ public class SearchRepository {
 
         // Check if username exist
         if (StringUtils.hasText(username)) {
-            appendCondition(sqlPredicate, "u.name = :name");
-            params.put("name", username);
+            appendCondition(sqlPredicate, "u.username = :username");
+            params.put("username", username);
         }
 
         // Check if firstName exist
@@ -65,6 +65,10 @@ public class SearchRepository {
             queryCount.setParameter(key, value);
         });
 
+        // Create pageable
+        pageNumber--;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
         // Select
         querySelect.setFirstResult(pageNumber);
         querySelect.setMaxResults(pageSize);
@@ -72,10 +76,6 @@ public class SearchRepository {
 
         // Count
         Long totalUsers = (Long) queryCount.getSingleResult();
-
-        // Create pageable
-        pageNumber--;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
         return new PageImpl<>(users, pageable, totalUsers);
     }

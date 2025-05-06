@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +28,6 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @PreAuthorize("hasRole('USER')")
     public PageDto<UserResponse> getAllUser(int pageNumber, int pageSize) {
         pageNumber--;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);

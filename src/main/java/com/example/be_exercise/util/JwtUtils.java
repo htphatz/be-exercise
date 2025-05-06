@@ -1,13 +1,16 @@
 package com.example.be_exercise.util;
 
 import com.example.be_exercise.exception.InvalidTokenException;
+import com.example.be_exercise.exception.UnauthenticatedException;
 import com.example.be_exercise.model.User;
+import com.example.be_exercise.repository.InvalidTokenRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +32,9 @@ public class JwtUtils {
 
     @Value(value = "${jwt.refresh-duration}")
     private int refreshDuration;
+
+    @Autowired
+    private InvalidTokenRepository invalidTokenRepository;
 
     public String generateAccessToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -93,6 +99,9 @@ public class JwtUtils {
         if (!(verified && expirationDate.after(new Date()))) {
             throw new InvalidTokenException("Invalid token");
         }
+
+        if (invalidTokenRepository.existsById(jwtId))
+            throw new UnauthenticatedException("Unauthenticated");
 
         return signedJWT;
     }

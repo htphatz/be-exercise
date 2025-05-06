@@ -15,13 +15,11 @@ import com.example.be_exercise.repository.RoleRepository;
 import com.example.be_exercise.repository.UserRepository;
 import com.example.be_exercise.service.IAuthService;
 import com.example.be_exercise.util.JwtUtils;
-import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -123,7 +121,7 @@ public class AuthService implements IAuthService {
             // Check if refresh token is invalid
             String jwtId = token.getJWTClaimsSet().getJWTID();
             Instant expirationTime = token.getJWTClaimsSet().getExpirationTime().toInstant();
-            if(invalidTokenRepository.existsById(jwtId))
+            if (invalidTokenRepository.existsById(jwtId))
                 throw new InvalidRefreshTokenException("Invalid refresh token");
 
             InvalidToken invalidToken = InvalidToken.builder()
