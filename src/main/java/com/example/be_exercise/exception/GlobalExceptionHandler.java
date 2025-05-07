@@ -95,4 +95,13 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
+
+    @ExceptionHandler(InvalidPasswordResetCodeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidPasswordResetCodeException(InvalidPasswordResetCodeException e) {
+        ErrorResponse error = ErrorResponse.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }

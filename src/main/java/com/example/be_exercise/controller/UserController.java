@@ -1,9 +1,12 @@
 package com.example.be_exercise.controller;
 
+import com.example.be_exercise.dto.request.ChangePasswordRequest;
+import com.example.be_exercise.dto.request.ForgetPasswordRequest;
 import com.example.be_exercise.dto.response.APIResponse;
 import com.example.be_exercise.dto.response.PageDto;
 import com.example.be_exercise.dto.response.UserResponse;
 import com.example.be_exercise.service.impl.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +47,18 @@ public class UserController {
     @DeleteMapping("{id}")
     public APIResponse<Void> deleteById(@PathVariable("id") String id) {
         userService.deleteById(id);
+        return APIResponse.<Void>builder().build();
+    }
+
+    @PostMapping("forget-password")
+    public APIResponse<Void> forgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
+        userService.forgetPassword(request.getEmail());
+        return APIResponse.<Void>builder().build();
+    }
+
+    @PostMapping("change-password")
+    public APIResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(request.getCode(), request.getEmail(), request.getNewPassword());
         return APIResponse.<Void>builder().build();
     }
 }

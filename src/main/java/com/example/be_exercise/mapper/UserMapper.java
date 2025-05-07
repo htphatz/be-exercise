@@ -12,7 +12,8 @@ public class UserMapper {
         return user -> UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .fullName(user.getFirstName() + " " + user.getLastName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .email(user.getEmail())
                 .build();
     }
@@ -21,7 +22,8 @@ public class UserMapper {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .fullName(user.getFirstName() + " " + user.getLastName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .email(user.getEmail())
                 .build();
     }

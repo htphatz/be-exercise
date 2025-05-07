@@ -23,7 +23,7 @@ public class SearchRepository {
     public Page<User> searchUsers(int pageNumber, int pageSize, String username, String firstName, String lastName, String email) {
         StringBuilder sqlSelect = new StringBuilder("SELECT u FROM User u");
         StringBuilder sqlCount = new StringBuilder("SELECT COUNT(u) FROM User u");
-        StringBuilder sqlPredicate = new StringBuilder();
+        StringBuilder sqlPredicate = new StringBuilder(" WHERE u.isDelete = false");
 
         Map<String, String> params = new HashMap<>();
 
@@ -73,6 +73,7 @@ public class SearchRepository {
         querySelect.setFirstResult(pageNumber);
         querySelect.setMaxResults(pageSize);
         List<User> users = (List<User>) querySelect.getResultList();
+        users = users.stream().filter(user -> !user.isDelete()).toList();
 
         // Count
         Long totalUsers = (Long) queryCount.getSingleResult();

@@ -8,4 +8,6 @@ public interface IUserService {
     PageDto<UserResponse> getAllUser(int pageNumber, int pageSize);
     PageDto<UserResponse> searchUsers(int pageNumber, int pageSize, String username, String firstName, String lastName, String email);
     void deleteById(String id);
+    void forgetPassword(String email);
+    void changePassword(int code, String email, String newPassword);
 }
