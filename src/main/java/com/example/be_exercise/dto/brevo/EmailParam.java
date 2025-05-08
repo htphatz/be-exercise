@@ -7,5 +7,5 @@ import lombok.Getter;
 @Builder
 public class EmailParam {
     private String email;
-    private int code;
+    private Object code;
 }

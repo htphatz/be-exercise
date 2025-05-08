@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,4 +46,13 @@ public class User {
 
     @Column(name = "is_delete")
     private boolean isDelete = false;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "token_expiration")
+    private Instant tokenExpiration;
+
+    @Column(name = "is_verify")
+    private boolean isVerify = false;
 }

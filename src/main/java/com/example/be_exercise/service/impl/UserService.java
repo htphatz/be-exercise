@@ -5,6 +5,7 @@ import com.example.be_exercise.dto.brevo.EmailRequest;
 import com.example.be_exercise.dto.brevo.RecipientRequest;
 import com.example.be_exercise.dto.response.PageDto;
 import com.example.be_exercise.dto.response.UserResponse;
+import com.example.be_exercise.exception.InvalidCodeVerificationException;
 import com.example.be_exercise.exception.InvalidPasswordResetCodeException;
 import com.example.be_exercise.exception.NotFoundException;
 import com.example.be_exercise.mapper.UserMapper;
@@ -15,6 +16,7 @@ import com.example.be_exercise.repository.SearchRepository;
 import com.example.be_exercise.repository.UserRepository;
 import com.example.be_exercise.repository.httpclient.BrevoClient;
 import com.example.be_exercise.service.IUserService;
+import com.example.be_exercise.util.TokenGeneratorUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -34,13 +36,17 @@ public class UserService implements IUserService {
     private final SearchRepository searchRepository;
     private final PasswordResetCodeRepository passwordResetCodeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenGeneratorUtils tokenGeneratorUtils;
     private final BrevoClient brevoClient;
 
     @Value("${brevo.api-key}")
     private String apiKey;
 
-    @Value("${brevo.template-id}")
-    private int templateId;
+    @Value("${brevo.template-forget-password}")
+    private int templateForgetPassword;
+
+    @Value("${brevo.template-verify-email}")
+    private int templateVerifyEmail;
 
     @Override
     public UserResponse getById(String id) {
@@ -78,7 +84,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void forgetPassword(String email) {
+    public void sendVerifyEmail(String email) {
         User exitingUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
 
@@ -86,7 +92,36 @@ public class UserService implements IUserService {
                 .email(email)
                 .build();
 
-        int code = randomCode();
+        String code = tokenGeneratorUtils.generateVerificationToken();
+        String htmlLink = "http://localhost:8080/users/verify-email?token=" + code + "&email=" + email;
+        EmailParam params = EmailParam.builder()
+                .code(htmlLink)
+                .email(email)
+                .build();
+
+        EmailRequest emailRequest = EmailRequest.builder()
+                .to(List.of(recipient))
+                .templateId(templateVerifyEmail)
+                .params(params)
+                .build();
+
+        brevoClient.sendEmail(apiKey, emailRequest);
+
+        exitingUser.setVerificationToken(code);
+        exitingUser.setTokenExpiration(Instant.now().plus(5, ChronoUnit.MINUTES));
+        userRepository.save(exitingUser);
+    }
+
+    @Override
+    public void sendForgetPassword(String email) {
+        User exitingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
+
+        RecipientRequest recipient = RecipientRequest.builder()
+                .email(email)
+                .build();
+
+        int code = tokenGeneratorUtils.generatePasswordRestToken();
         EmailParam params = EmailParam.builder()
                 .code(code)
                 .email(email)
@@ -94,7 +129,7 @@ public class UserService implements IUserService {
 
         EmailRequest emailRequest = EmailRequest.builder()
                 .to(List.of(recipient))
-                .templateId(templateId)
+                .templateId(templateForgetPassword)
                 .params(params)
                 .build();
 
@@ -126,17 +161,32 @@ public class UserService implements IUserService {
         userRepository.save(user);
     }
 
+    @Override
+    public void verifyEmail(String email, String token) {
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
+
+        if (existingUser.getVerificationToken() == null || !existingUser.getVerificationToken().equals(token)) {
+            throw new InvalidCodeVerificationException("Invalid token");
+        }
+
+        if (existingUser.getTokenExpiration().isBefore(Instant.now())) {
+            throw new InvalidCodeVerificationException("Token verification already expired");
+        }
+
+        existingUser.setVerify(true);
+        existingUser.setVerificationToken(null);
+        existingUser.setTokenExpiration(null);
+        userRepository.save(existingUser);
+    }
+
     private void savePasswordResetCode(User user, int code) {
         PasswordResetCode passwordResetCode = PasswordResetCode.builder()
                 .userId(user.getId())
                 .code(code)
-                .expirationTime(Instant.now().plus(10, ChronoUnit.MINUTES))
+                .expirationTime(Instant.now().plus(5, ChronoUnit.MINUTES))
                 .build();
 
         passwordResetCodeRepository.save(passwordResetCode);
-    }
-
-    private int randomCode() {
-        return (int) (Math.random() * 100000000);
     }
 }

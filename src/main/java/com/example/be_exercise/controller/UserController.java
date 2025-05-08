@@ -1,7 +1,8 @@
 package com.example.be_exercise.controller;
 
 import com.example.be_exercise.dto.request.ChangePasswordRequest;
-import com.example.be_exercise.dto.request.ForgetPasswordRequest;
+import com.example.be_exercise.dto.request.SendForgetPasswordRequest;
+import com.example.be_exercise.dto.request.SendVerifyEmailRequest;
 import com.example.be_exercise.dto.response.APIResponse;
 import com.example.be_exercise.dto.response.PageDto;
 import com.example.be_exercise.dto.response.UserResponse;
@@ -50,15 +51,29 @@ public class UserController {
         return APIResponse.<Void>builder().build();
     }
 
-    @PostMapping("forget-password")
-    public APIResponse<Void> forgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
-        userService.forgetPassword(request.getEmail());
+    @PostMapping("send-forget-password")
+    public APIResponse<Void> senndForgetPassword(@Valid @RequestBody SendForgetPasswordRequest request) {
+        userService.sendForgetPassword(request.getEmail());
         return APIResponse.<Void>builder().build();
     }
 
     @PostMapping("change-password")
     public APIResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         userService.changePassword(request.getCode(), request.getEmail(), request.getNewPassword());
+        return APIResponse.<Void>builder().build();
+    }
+
+    @PostMapping("send-verify-email")
+    public APIResponse<Void> sendVerifyEmail(@Valid @RequestBody SendVerifyEmailRequest request) {
+        userService.sendVerifyEmail(request.getEmail());
+        return APIResponse.<Void>builder().build();
+    }
+
+    @GetMapping("verify-email")
+    public APIResponse<Void> verifyEmail(
+            @RequestParam(name = "email") String email,
+            @RequestParam(name = "token") String token) {
+        userService.verifyEmail(email, token);
         return APIResponse.<Void>builder().build();
     }
 }
