@@ -1,5 +1,6 @@
 package com.example.be_exercise.service.impl;
 
+import com.example.be_exercise.dto.n8n.N8nRequest;
 import com.example.be_exercise.dto.request.*;
 import com.example.be_exercise.dto.response.IntrospectResponse;
 import com.example.be_exercise.dto.response.LoginResponse;
@@ -13,8 +14,9 @@ import com.example.be_exercise.model.User;
 import com.example.be_exercise.repository.InvalidTokenRepository;
 import com.example.be_exercise.repository.RoleRepository;
 import com.example.be_exercise.repository.UserRepository;
+import com.example.be_exercise.repository.httpclient.N8nClient;
 import com.example.be_exercise.service.IAuthService;
-import com.example.be_exercise.util.JwtUtils;
+import com.example.be_exercise.utils.JwtUtils;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class AuthService implements IAuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final InvalidTokenRepository invalidTokenRepository;
+    private final N8nClient n8nClient;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
 
@@ -51,11 +54,26 @@ public class AuthService implements IAuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
+                .isDelete(false)
+                .isVerify(false)
                 .build();
 
         Set<Role> roles = new HashSet<>();
         roleRepository.findByName(Role.USER).ifPresent(roles::add);
         user.setRoles(roles);
+
+        // N8n webhook
+        N8nRequest n8nRequest = N8nRequest.builder()
+                .username(request.getUsername())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .build();
+        try {
+            n8nClient.sendToN8n(n8nRequest);
+        } catch (Exception e) {
+            log.error("Failed to send n8n webhook", e);
+        }
 
         return UserMapper.toDto(userRepository.save(user));
     }

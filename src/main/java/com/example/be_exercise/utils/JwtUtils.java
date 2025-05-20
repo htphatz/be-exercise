@@ -1,4 +1,4 @@
-package com.example.be_exercise.util;
+package com.example.be_exercise.utils;
 
 import com.example.be_exercise.exception.InvalidTokenException;
 import com.example.be_exercise.exception.UnauthenticatedException;
@@ -48,6 +48,7 @@ public class JwtUtils {
                 ))
                 // Spring tự động phân quyền với JWT thông qua claim "SCOPE"
                 .claim("scope", buildScope(user))
+                .claim("email", user.getEmail())
                 .build();
 
         Payload payload = new Payload(claimsSet.toJSONObject());

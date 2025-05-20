@@ -20,6 +20,6 @@ public class Role {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    public final static String ADMIN = "admin";
-    public final static String USER = "user";
+    public final static String ADMIN = "ADMIN";
+    public final static String USER = "USER";
 }

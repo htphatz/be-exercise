@@ -1,4 +1,4 @@
-package com.example.be_exercise.util;
+package com.example.be_exercise.utils;
 
 import org.springframework.stereotype.Component;
 

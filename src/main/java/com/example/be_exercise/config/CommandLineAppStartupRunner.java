@@ -25,19 +25,28 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Create role admin
+        // Create default role USER, ADMIN
         if (!roleRepository.existsByName(Role.ADMIN)) {
             Role role = Role.builder()
                     .name(Role.ADMIN)
                     .build();
             roleRepository.save(role);
         }
+        if (!roleRepository.existsByName(Role.USER)) {
+            Role role = Role.builder()
+                    .name(Role.USER)
+                    .build();
+            roleRepository.save(role);
+        }
 
         // Create default user admin
-        if (!userRepository.existsByUsername(Role.ADMIN)) {
+        if (!userRepository.existsByUsername("admin")) {
             User user = User.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("admin"))
+                    .email("admin@gmail.com")
+                    .firstName("Huynh")
+                    .lastName("Phat")
                     .build();
 
             Set<Role> roles = new HashSet<>();

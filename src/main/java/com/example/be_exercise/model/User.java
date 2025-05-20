@@ -45,7 +45,7 @@ public class User {
     Set<Role> roles = new HashSet<>();
 
     @Column(name = "is_delete")
-    private boolean isDelete = false;
+    private boolean isDelete;
 
     @Column(name = "verification_token")
     private String verificationToken;
@@ -54,5 +54,5 @@ public class User {
     private Instant tokenExpiration;
 
     @Column(name = "is_verify")
-    private boolean isVerify = false;
+    private boolean isVerify;
 }

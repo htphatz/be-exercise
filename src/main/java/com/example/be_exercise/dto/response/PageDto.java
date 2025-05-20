@@ -1,15 +1,13 @@
 package com.example.be_exercise.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.function.Function;
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

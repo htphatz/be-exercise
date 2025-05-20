@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ChangePasswordRequest {
-    private int code;
-    private String newPassword;
+public class VerifyEmailRequest {
+    private String token;
+    private String email;
 }
